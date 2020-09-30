@@ -16,3 +16,4 @@ dużo
 - [x] jakiś prototyp
 - [ ] restrukturyzacja kodu
 - [ ] pokazywanie rankingu memiarzy
+- [ ] przypisywanie konta Jeja do konta Discord

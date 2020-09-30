@@ -13,6 +13,7 @@ import requests
 from replit import db
 
 from strona import keep_alive
+from error import BadUserError
 
 keep_alive()
 
@@ -50,8 +51,21 @@ class Uzytkownik():
 
 		# ilość strzałek w górę
 		self.strzalki = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[5]/div[2]/div[1]/text()')[0]
-		
 
+# better class
+class Temp():
+	def __init__(self, user: str):
+		self.link = "https://www.jeja.pl/user,{}".format(user)
+		jeja = requests.get(self.link)
+		strona = html.fromstring(jeja.content)
+
+		check = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/h2/text()')[0]
+		
+		if check != "Informacja":
+			raise BadUserError(user)
+
+		self.dane = {k:v for k,v in zip(strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-left"]/text()'),strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')) if k != "strona www"}
+		
 
 # jeśli bot dołączy
 @bot.event

@@ -57,15 +57,20 @@ class Temp():
 	def __init__(self, user: str):
 		self.link = "https://www.jeja.pl/user,{}".format(user)
 		jeja = requests.get(self.link)
-		strona = html.fromstring(jeja.content)
+		self.strona = html.fromstring(jeja.content)
 
-		check = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/h2/text()')[0]
+		check = self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/h2/text()')[0]
 		
 		if check != "Informacja":
 			raise BadUserError(user)
 
-		self.dane = {k:v for k,v in zip(strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-left"]/text()'),strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')) if k != "strona www"}
-		
+		self.dane = {k:v for k,v in zip(self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-left"]/text()'),self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')) if k != "strona www"}
+
+	# bierze opis ze strony
+	def get_opis(self):
+		opis = self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-opis"]/div[2]/text()')
+		if opis:
+			return opis[0] 		
 
 # jeśli bot dołączy
 @bot.event

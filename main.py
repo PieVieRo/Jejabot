@@ -57,20 +57,53 @@ class Temp():
 	def __init__(self, user: str):
 		self.link = "https://www.jeja.pl/user,{}".format(user)
 		jeja = requests.get(self.link)
-		self.strona = html.fromstring(jeja.content)
+		self._strona = html.fromstring(jeja.content)
 
-		check = self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/h2/text()')[0]
-		
-		if check != "Informacja":
-			raise BadUserError(user)
+		check = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/h2/text()')[0]
 
-		self.dane = {k:v for k,v in zip(self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-left"]/text()'),self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')) if k != "strona www"}
+		if check == "Informacja":
+			raise BadUserError(f"Nie ma użytkownika o nazwie `{user}`")
 
-	# bierze opis ze strony
+		dane_left = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-left"]/text()')
+
+		if "Strona www:" in dane_left:
+			dane_left.remove("Strona www:")
+
+		dane_right = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')
+
+		self.dane = {k[:-1]:v for k,v in zip(dane_left,dane_right) if k[:-1] != "Strona www"}
+
+		self.pd = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil liczby-one liczby-one-two"]/div/strong/text()')
+
+		if not self.pd:
+			self.brakpd = True
+
+
+
+	# zwraca link do profilu
+	def get_link(self):
+		return self.link
+
+	# zwraca opis profilu
 	def get_opis(self):
-		opis = self.strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-opis"]/div[2]/text()')
+		opis = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-opis"]/div[2]/text()')
 		if opis:
-			return opis[0] 		
+			return opis[0]
+
+	# zwraca avatar profilu
+	def get_avatar(self):
+		pass
+	
+	# zwraca ilość strzałek
+	def get_strzalki(self):
+		hasStrzalki = "Komentarze" in self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-liczby"]/div[@class="profil-liczby-left"]/text()')
+		strzalki = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[5]/div[@class="profil-liczby-right"]/div[@class="bn"]/text()')
+		return strzalki[0] if hasStrzalki else None
+
+	# zwraca login uzytkownika
+	def get_login(self):
+		return self.dane["Login"]
+
 
 # jeśli bot dołączy
 @bot.event
@@ -114,6 +147,38 @@ async def link(ctx, user: str):
 		await ctx.send(f"link do profilu: {uzytkownik.link}")
 	except:
 		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
+
+@bot.command()
+async def test_link(ctx, user: str):
+	try:
+		uzytkownik = Temp(user)
+	except BadUserError as e:
+		await ctx.send(e)
+		return
+	await ctx.send(uzytkownik.get_link())
+
+@bot.command()
+async def test_strzalki(ctx, user: str):
+	try:
+		uzytkownik = Temp(user)
+	except BadUserError as e:
+		await ctx.send(e)
+		return
+	strzalki = uzytkownik.get_strzalki()
+
+	if strzalki is not None:
+		await ctx.send(f"{uzytkownik.get_login()} ma `{strzalki}` strzałek w górę")
+	else:
+		await ctx.send(f"{uzytkownik.get_login()} ma ukryte strzałki albo ich po prostu nie ma")
+
+@bot.command()
+async def dev(ctx, user: str):
+	try:
+		uzytkownik = Temp(user)
+	except BadUserError as e:
+		await ctx.send(e)
+		return
+	await ctx.send(uzytkownik.dane)
 
 # dziala bot
 bot.run(getenv('token'))

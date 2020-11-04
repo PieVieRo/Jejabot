@@ -12,9 +12,10 @@ import requests
 # baza danych zeby zarejestrowac sb
 from replit import db
 
-from strona import keep_alive
 from error import BadUserError
 
+# chce zeby bot za free dzialal
+from strona import keep_alive
 keep_alive()
 
 # opis
@@ -71,12 +72,14 @@ class Temp():
 
 		dane_right = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-dane"]/div[@class="profil-dane-right"]/text()')
 
-		self.dane = {k[:-1]:v for k,v in zip(dane_left,dane_right) if k[:-1] != "Strona www"}
+		self.dane = {k[:-1]:v for k,v in zip(dane_left,dane_right)}
 
 		self.pd = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil liczby-one liczby-one-two"]/div/strong/text()')
 
 		if not self.pd:
 			self.brakpd = True
+
+		self.raw_staty = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-liczby"]/div')
 
 
 
@@ -172,13 +175,28 @@ async def test_strzalki(ctx, user: str):
 		await ctx.send(f"{uzytkownik.get_login()} ma ukryte strzałki albo ich po prostu nie ma")
 
 @bot.command()
+async def ranking(ctx):
+	ranking = []
+	do_wyslania = ''
+	with ctx.typing():
+		for i in range(4):
+			znaczki = f"https://www.jeja.pl/doswiadczenie,miesiac,{i}"
+			strona = requests.get(znaczki)
+			wszystko = html.fromstring(strona.content)
+			ranking.extend(wszystko.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="best-month-box"]/div/div[1]/a/text()'))
+		for k,v in enumerate(ranking):
+			do_wyslania += f"{k+1}. {v}\n"
+	await ctx.send(f"Ranking w tym miesiącu\n```{do_wyslania}```")
+	await ctx.send(len(ranking))
+
+@bot.command()
 async def dev(ctx, user: str):
 	try:
 		uzytkownik = Temp(user)
 	except BadUserError as e:
 		await ctx.send(e)
 		return
-	await ctx.send(uzytkownik.dane)
+	await ctx.send(uzytkownik.raw_staty)
 
 # dziala bot
 bot.run(getenv('token'))

@@ -39,21 +39,27 @@ class Uzytkownik():
 		strona = html.fromstring(jeja.content)
 		
 		# nazwa użytkownika
+		# username
 		self.nick = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[1]/div[2]/text()')[0]
 
 		# zdjęcie profilowe
+		# profile picture
 		self.avek = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/img/@src')[0]
 
 		# poziom doświadczenia
+		# level
 		self.lvl = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[3]/div[2]/div[2]/div[1]/strong/text()')[0]
 
 		# liczba punktów doświadczenia
+		# xp
 		self.pkt = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[3]/div[2]/div[2]/div[2]/strong/text()')[0]
 
 		# ilość strzałek w górę
+		# number of upvotes
 		self.strzalki = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[5]/div[2]/div[1]/text()')[0]
 
 # better class
+# gonna change Uzytkownik() to this soon
 class Temp():
 	def __init__(self, user: str):
 		self.link = "https://www.jeja.pl/user,{}".format(user)
@@ -84,39 +90,47 @@ class Temp():
 
 
 	# zwraca link do profilu
+	# returns link to profile
 	def get_link(self):
 		return self.link
 
 	# zwraca opis profilu
+	# return profile's description
 	def get_opis(self):
 		opis = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-opis"]/div[2]/text()')
 		if opis:
 			return opis[0]
 
 	# zwraca avatar profilu
+	# returns profile picture
 	def get_avatar(self):
 		pass
 	
 	# zwraca ilość strzałek
+	# returns upvote count
 	def get_strzalki(self):
 		hasStrzalki = "Komentarze" in self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-liczby"]/div[@class="profil-liczby-left"]/text()')
 		strzalki = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[5]/div[@class="profil-liczby-right"]/div[@class="bn"]/text()')
 		return strzalki[0] if hasStrzalki else None
 
 	# zwraca login uzytkownika
+	# returns username
 	def get_login(self):
 		return self.dane["Login"]
 
 
 # jeśli bot dołączy
+# when bot starts
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------')
+	print('Logged in as')
+	print(bot.user.name)
+	print(bot.user.id)
+	print(discord.__version__)
+	print('------')
 
 # wysyła ilość strzałek w górę
+# sends upvotes count
 @bot.command()
 async def strzalki(ctx, user: str):
 	try:
@@ -126,6 +140,7 @@ async def strzalki(ctx, user: str):
 	except:
 		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
 
+# sends xp and lvl
 @bot.command()
 async def pd(ctx, user: str):
 	try:
@@ -134,6 +149,7 @@ async def pd(ctx, user: str):
 	except:
 		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
 
+# sends profile picture
 @bot.command()
 async def avek(ctx, user: str):
 	try:
@@ -143,6 +159,7 @@ async def avek(ctx, user: str):
 	except:
 		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
 
+# sends link to profile
 @bot.command(aliases=['profil'])
 async def link(ctx, user: str):
 	try:
@@ -151,6 +168,7 @@ async def link(ctx, user: str):
 	except:
 		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
 
+# sends link to profile using the better class
 @bot.command()
 async def test_link(ctx, user: str):
 	try:
@@ -160,6 +178,7 @@ async def test_link(ctx, user: str):
 		return
 	await ctx.send(uzytkownik.get_link())
 
+# sends upvotes count using the better class
 @bot.command()
 async def test_strzalki(ctx, user: str):
 	try:
@@ -174,21 +193,22 @@ async def test_strzalki(ctx, user: str):
 	else:
 		await ctx.send(f"{uzytkownik.get_login()} ma ukryte strzałki albo ich po prostu nie ma")
 
+# shows ranking
 @bot.command()
 async def ranking(ctx):
 	ranking = []
 	do_wyslania = ''
-	with ctx.typing():
-		for i in range(4):
+	async with ctx.typing():
+		for i in range(5):
 			znaczki = f"https://www.jeja.pl/doswiadczenie,miesiac,{i}"
 			strona = requests.get(znaczki)
 			wszystko = html.fromstring(strona.content)
-			ranking.extend(wszystko.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="best-month-box"]/div/div[1]/a/text()'))
+			ranking.extend(wszystko.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div/div/div[1]/a/text()'))
 		for k,v in enumerate(ranking):
 			do_wyslania += f"{k+1}. {v}\n"
 	await ctx.send(f"Ranking w tym miesiącu\n```{do_wyslania}```")
-	await ctx.send(len(ranking))
 
+# a dev command (always changes)
 @bot.command()
 async def dev(ctx, user: str):
 	try:

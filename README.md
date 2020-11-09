@@ -10,10 +10,11 @@ j!strzalki - pokazuje ilość strzałek w górę
 ```
 
 ### Błędy
-dużo
+~~dużo~~
+mniej
 
 ### Co robię
 - [x] jakiś prototyp
+- [x] pokazywanie rankingu memiarzy
 - [ ] restrukturyzacja kodu
-- [ ] pokazywanie rankingu memiarzy
 - [ ] przypisywanie konta Jeja do konta Discord

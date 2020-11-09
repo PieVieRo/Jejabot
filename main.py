@@ -80,15 +80,6 @@ class Temp():
 
 		self.dane = {k[:-1]:v for k,v in zip(dane_left,dane_right)}
 
-		self.pd = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil liczby-one liczby-one-two"]/div/strong/text()')
-
-		if not self.pd:
-			self.brakpd = True
-
-		self.raw_staty = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[@class="profil-liczby"]/div')
-
-
-
 	# zwraca link do profilu
 	# returns link to profile
 	def get_link(self):
@@ -104,7 +95,8 @@ class Temp():
 	# zwraca avatar profilu
 	# returns profile picture
 	def get_avatar(self):
-		pass
+		avek = self._strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/img/@src')
+		return avek[0]
 	
 	# zwraca ilość strzałek
 	# returns upvote count
@@ -192,6 +184,17 @@ async def test_strzalki(ctx, user: str):
 		await ctx.send(f"{uzytkownik.get_login()} ma `{strzalki}` strzałek w górę")
 	else:
 		await ctx.send(f"{uzytkownik.get_login()} ma ukryte strzałki albo ich po prostu nie ma")
+
+@bot.command()
+async def test_avek(ctx, user: str):
+	try:
+		uzytkownik = Temp(user)
+	except BadUserError as e:
+		await ctx.send(e) 
+		return
+	
+	await ctx.send(f"Profil użytkownika {uzytkownik.get_login()}")
+	await ctx.send(uzytkownik.get_avatar())
 
 # shows ranking
 @bot.command()

@@ -203,10 +203,10 @@ async def ranking(ctx):
 	do_wyslania = ''
 	async with ctx.typing():
 		for i in range(5):
-			znaczki = f"https://www.jeja.pl/doswiadczenie,miesiac,{i}"
+			znaczki = f"https://memy.jeja.pl/ranking_memiarzy,{i}"
 			strona = requests.get(znaczki)
 			wszystko = html.fromstring(strona.content)
-			ranking.extend(wszystko.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div/div/div[1]/a/text()'))
+			ranking.extend(wszystko.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div/div/div/div[1]/a/text()'))
 		for k,v in enumerate(ranking):
 			do_wyslania += f"{k+1}. {v}\n"
 	await ctx.send(f"Ranking w tym miesiącu\n```{do_wyslania}```")

@@ -32,35 +32,9 @@ description = "bot dla jejaków"
 # bot
 bot = commands.Bot(command_prefix='j!')
 
-class Uzytkownik():
-	def __init__(self, user: str):
-		self.link = "https://www.jeja.pl/user,{}".format(user)
-		jeja = requests.get(self.link)
-		strona = html.fromstring(jeja.content)
-		
-		# nazwa użytkownika
-		# username
-		self.nick = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[1]/div[2]/text()')[0]
-
-		# zdjęcie profilowe
-		# profile picture
-		self.avek = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/img/@src')[0]
-
-		# poziom doświadczenia
-		# level
-		self.lvl = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[3]/div[2]/div[2]/div[1]/strong/text()')[0]
-
-		# liczba punktów doświadczenia
-		# xp
-		self.pkt = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[3]/div[2]/div[2]/div[2]/strong/text()')[0]
-
-		# ilość strzałek w górę
-		# number of upvotes
-		self.strzalki = strona.xpath('//*[@id="wrapper-wrap"]/div[1]/div/div[1]/div[5]/div[2]/div[1]/text()')[0]
-
 # better class
 # gonna change Uzytkownik() to this soon
-class Temp():
+class Uzytkownik():
 	def __init__(self, user: str):
 		self.link = "https://www.jeja.pl/user,{}".format(user)
 		jeja = requests.get(self.link)
@@ -121,60 +95,23 @@ async def on_ready():
 	print(discord.__version__)
 	print('------')
 
-# wysyła ilość strzałek w górę
-# sends upvotes count
-@bot.command()
-async def strzalki(ctx, user: str):
-	try:
-		
-		uzytkownik = Uzytkownik(user)
-		await ctx.send(f"{uzytkownik.nick} ma `{uzytkownik.strzalki}` strzałek w górę")
-	except:
-		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
-
-# sends xp and lvl
-@bot.command()
-async def pd(ctx, user: str):
-	try:
-		uzytkownik = Uzytkownik(user)
-		await ctx.send(f"{uzytkownik.nick} ma poziom `{uzytkownik.lvl}` i `{uzytkownik.pkt}` punktów doświadczenia")
-	except:
-		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
-
-# sends profile picture
-@bot.command()
-async def avek(ctx, user: str):
-	try:
-		uzytkownik = Uzytkownik(user)
-		await ctx.send(f"Zdjęcie profilowe użytkownika {uzytkownik.nick}")
-		await ctx.send(uzytkownik.avek)
-	except:
-		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
-
-# sends link to profile
+# wysyła link do profilu
+# sends profile link
 @bot.command(aliases=['profil'])
 async def link(ctx, user: str):
 	try:
 		uzytkownik = Uzytkownik(user)
-		await ctx.send(f"link do profilu: {uzytkownik.link}")
-	except:
-		await ctx.send(f"Nie ma użytkownika o nazwie `{user}`")
-
-# sends link to profile using the better class
-@bot.command()
-async def test_link(ctx, user: str):
-	try:
-		uzytkownik = Temp(user)
 	except BadUserError as e:
 		await ctx.send(e)
 		return
 	await ctx.send(uzytkownik.get_link())
 
-# sends upvotes count using the better class
-@bot.command()
-async def test_strzalki(ctx, user: str):
+# wysyła ilość strzałek w górę
+# sends upvotes count
+@bot.command(alias=['strzałki'])
+async def strzalki(ctx, user: str):
 	try:
-		uzytkownik = Temp(user)
+		uzytkownik = Uzytkownik(user)
 	except BadUserError as e:
 		await ctx.send(e)
 		return
@@ -185,17 +122,20 @@ async def test_strzalki(ctx, user: str):
 	else:
 		await ctx.send(f"{uzytkownik.get_login()} ma ukryte strzałki albo ich po prostu nie ma")
 
+# wysyła obrazek profilowy użytkownika
+# sends user's profile picture
 @bot.command()
-async def test_avek(ctx, user: str):
+async def avek(ctx, user: str):
 	try:
-		uzytkownik = Temp(user)
+		uzytkownik = Uzytkownik(user)
 	except BadUserError as e:
 		await ctx.send(e) 
 		return
 	
 	await ctx.send(f"Profil użytkownika {uzytkownik.get_login()}")
 	await ctx.send(uzytkownik.get_avatar())
-
+	
+# pokazuje ranking memiarzy (nie miesięczny)
 # shows ranking
 @bot.command()
 async def ranking(ctx):
@@ -210,16 +150,6 @@ async def ranking(ctx):
 		for k,v in enumerate(ranking):
 			do_wyslania += f"{k+1}. {v}\n"
 	await ctx.send(f"Ranking w tym miesiącu\n```{do_wyslania}```")
-
-# a dev command (always changes)
-@bot.command()
-async def dev(ctx, user: str):
-	try:
-		uzytkownik = Temp(user)
-	except BadUserError as e:
-		await ctx.send(e)
-		return
-	await ctx.send(uzytkownik.raw_staty)
 
 # dziala bot
 bot.run(getenv('token'))

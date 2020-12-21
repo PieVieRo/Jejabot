@@ -17,4 +17,5 @@ mniej
 - [x] jakiś prototyp
 - [x] pokazywanie rankingu memiarzy
 - [ ] restrukturyzacja kodu
+- [ ] embedy
 - [ ] przypisywanie konta Jeja do konta Discord

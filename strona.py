@@ -9,8 +9,8 @@ def home():
 	komendy:<br>
 	j!strzałki - pokazuje strzałki<br>
 	j!avek - pokazuje avek<br>
-	j!pd - pokazuje pd <br>
-	j!link - daje link do profilu
+	j!link (j!profil) - daje link do profilu<br>
+	j!ranking - pokazuje ranking memiarzy <u>(nie miesięczny)</u><br>
 	"""
 	return stronka
 

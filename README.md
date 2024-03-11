@@ -1,6 +1,6 @@
+# Już nie działa, ze względu na to, że Wielcy Admini (Ave) nie pozwalają botom na podgląd stron
 ### Jejabot
 Statystyki kont na [jeja.pl](https://jeja.pl).
-
 ### Komendy
 ```
 j!pd - podaje PD użytkownika
